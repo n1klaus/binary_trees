@@ -31,15 +31,15 @@ binary_tree_t *binary_tree_insert_left(binary_tree_t *parent, int value)
 	if (lastNode != parent)
 	{
 		tempNode = lastNode->parent;
-		newNode->left = lastNode;
-		lastNode->parent = newNode;
 		tempNode->left = newNode;
 		newNode->parent = tempNode;
+		newNode->left = lastNode;
+		lastNode->parent = newNode;
 	}
 	else
 	{
 		lastNode->left = newNode;
-		newNode->parent = NULL;
+		newNode->parent = lastNode;
 	}
 	return (newNode);
 }
