@@ -1,25 +1,63 @@
 #include "binary_trees.h"
 /**
- * searchTree - searches an entire binary tree for the leaf node at the end
+ * shiftNodes - changes position of @new to @old position
  * @tree : pointer to the root node of the tree to search
- *
- * Return: leaf node found
+ * @old : pointer to the node to shift off the tree
+ * @new : pointer to the node to shift up the tree
+ * 
+ * Return: Nothing
  */
-binary_tree_t *searchTree(binary_tree_t *tree)
+void shiftNodes(binary_tree_t *tree, binary_tree_t *old, 
+			  binary_tree_t *new)
 {
-	binary_tree_t *currNode = tree;
+	if (new != NULL)
+		new->parent = old->parent;
 
-	while (currNode != NULL)
+	if (old->parent == NULL && tree != NULL)
+		tree = new;
+	else if (old == old->parent->left)
+		old->parent->left = new;
+	else if (old == old->parent->right)
+		old->parent->right = new;
+}
+
+/**
+ * getMinimum - look at all nodes on the left branches
+ * from the starting position with the smallest value
+ * @node : pointer to the node to start the search from
+ * 
+ * Return: node with smaller value than @node
+ */
+binary_tree_t *getMinimum(binary_tree_t *node)
+{
+	while (node->left != NULL)
+		node = node->left;
+	return (node);		
+}
+
+/**
+ * getSuccessor - look for a node with value larger than @node
+ * @node : pointer to the node to start the search from
+ * 
+ * Return: Next node with value larger than @node
+ */
+binary_tree_t *getSuccessor(binary_tree_t *node)
+{
+	binary_tree_t *parentNode = NULL;
+
+	if (node->right != NULL)
+		node = getMinimum(node->right);
+
+	parentNode = node->parent;
+	while (parentNode != NULL)	
 	{
-		printf("Visiting elements: %d\n", currNode->n);
-		if (currNode->left != NULL)
-			currNode = currNode->left;
-		else if (currNode->right != NULL)
-			currNode = currNode->right;
+		node = parentNode->right;
+		if (node != NULL)
+			parentNode = node;
 		else
 			break;
 	}
-	return (currNode);
+	return (parentNode);	
 }
 
 /**
@@ -30,42 +68,30 @@ binary_tree_t *searchTree(binary_tree_t *tree)
  */
 void binary_tree_delete(binary_tree_t *tree)
 {
-	binary_tree_t *lastNode = NULL, *tempNode = NULL;
+	binary_tree_t *tempNode = NULL, *currNode = NULL;
 
 	if (tree == NULL)
 		return;
 
-	lastNode = searchTree(tree);
-
-	while (lastNode != NULL)
+	currNode = tree;
+	while (currNode != NULL)
 	{
-		if (lastNode->left != NULL)
-		{
-			tempNode = lastNode->left;
-			lastNode->left = NULL;
-		}
-		else if (lastNode->right != NULL)
-		{
-			tempNode = lastNode->right;
-			lastNode->right = NULL;
-		}
+		if (currNode->left == NULL)
+			shiftNodes(tree, currNode, currNode->right);
+		else if (currNode->right == NULL)
+			shiftNodes(tree, currNode, currNode->left);
 		else
 		{
-			if (lastNode->parent == NULL)
+			tempNode = getSuccessor(currNode);
+			if (tempNode->parent != currNode)
 			{
-				tempNode = searchTree(tree);
-				if (tempNode->parent != NULL)
-					lastNode = tempNode->parent;
+				shiftNodes(tree, tempNode, tempNode->right);
+				tempNode->right = currNode->right;
+				tempNode->right->parent = tempNode;
 			}
-			else
-			{
-				tempNode = lastNode;
-				lastNode = lastNode->parent;
-			}
+			shiftNodes(tree, currNode, tempNode);
+			tempNode->left = currNode->left;
+			tempNode->left->parent = tempNode;
 		}
-		printf("Deleting elements: %d\n", tempNode->n);
-		tempNode->parent = NULL;
-		free(tempNode);
 	}
-	return;
 }
