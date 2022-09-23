@@ -1,9 +1,7 @@
 #include "binary_trees.h"
 /**
- * shiftNodes - changes position of @new to @old position
+ * binary_tree_delete - deletes an entire binary tree
  * @tree : pointer to the root node of the tree to search
- * @old : pointer to the node to shift off the tree
- * @new : pointer to the node to shift up the tree
  * 
  * Return: Nothing
  */
